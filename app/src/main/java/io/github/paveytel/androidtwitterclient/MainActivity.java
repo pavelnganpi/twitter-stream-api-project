@@ -25,14 +25,14 @@ public class MainActivity extends AppCompatActivity {
     private final String consumerSecrete = "Q46jheV7D1DACk2yZWbAuodNGEcn423LTzxlCcvmFOzhbuyEM0";
     private final String twitterAccessToken = "996217466-MC6LOjnt0W7XmbRVvKdwDuDgre0B2QKHcaec36bZ";
     private final String accessTokenSecret = "HZe3CvCD8XTFkylSnR5BJPu2kMmBC65NGtdxsWTYs0hFP";
-    private final String STREAM_URI = "https://stream.twitter.com/1.1/statuses/filter.json?track=kanyewest";
+    private final String STREAM_URI = "https://stream.twitter.com/1.1/statuses/filter.json?track=taylorswift";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        TwitterStreamBackground twitterStreamBackground = new TwitterStreamBackground();
-        twitterStreamBackground.execute();
+        TwitterStreamBackgroundTask twitterStreamBackgroundTask = new TwitterStreamBackgroundTask();
+        twitterStreamBackgroundTask.execute();
     }
 
     @Override
@@ -57,17 +57,17 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public class TwitterStreamBackground extends AsyncTask<Object, Void, Void> {
+    public class TwitterStreamBackgroundTask extends AsyncTask<Object, Void, Void> {
 
         @Override
         protected Void doInBackground(Object... params) {
 
-            test();
+            getTwitterStreamData();
             return null;
         }
     }
 
-    public void test(){
+    public void getTwitterStreamData(){
 
         OAuthService service = new ServiceBuilder()
                 .provider(TwitterApi.class)
