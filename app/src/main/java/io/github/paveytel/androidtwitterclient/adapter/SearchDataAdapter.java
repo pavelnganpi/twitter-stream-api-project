@@ -2,8 +2,6 @@ package io.github.paveytel.androidtwitterclient.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,49 +14,46 @@ import java.util.List;
 
 import io.github.paveytel.androidtwitterclient.R;
 import io.github.paveytel.androidtwitterclient.pojo.StreamRealmModel;
+import io.github.paveytel.androidtwitterclient.pojo.TwitterUserModel;
 import io.realm.RealmResults;
 
 /**
- * Created by z001hm0 on 9/3/15.
+ * Created by z001hm0 on 9/20/15.
  */
-public class StreamDataAdapter extends RecyclerView.Adapter<StreamDataAdapter.StreamDataViewHolder> {
+public class SearchDataAdapter extends RecyclerView.Adapter<SearchDataAdapter.SearchDataViewHolder> {
 
     protected Context mContext;
-    protected RealmResults<StreamRealmModel> mResults;
+    protected List<TwitterUserModel> mFriends;
 
-    public StreamDataAdapter(Context context, RealmResults<StreamRealmModel> results) {
+    public SearchDataAdapter(Context context, List<TwitterUserModel> friends) {
         this.mContext = context;
-        this.mResults = results;
+        this.mFriends = friends;
     }
 
     @Override
-    public StreamDataViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SearchDataAdapter.SearchDataViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.main_item, parent, false);
-        return new StreamDataViewHolder(view);
+        return new SearchDataViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(StreamDataViewHolder streamDataViewHolder, int position) {
-         streamDataViewHolder.bindStreamData(mResults.get(position));
+    public void onBindViewHolder(SearchDataViewHolder searchDataViewHolder, int position) {
+        searchDataViewHolder.bindStreamData(mFriends.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return mResults.size();
+        return mFriends.size();
     }
 
-    public void refill(RealmResults<StreamRealmModel> results) {
-        mResults = results;
-    }
-
-    public class StreamDataViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class SearchDataViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         protected TextView mNameLabel;
         protected TextView mScreenNameLabel;
         protected TextView mTextLabel;
         protected ImageView mProfileImageView;
 
-        public StreamDataViewHolder(View itemView){
+        public SearchDataViewHolder(View itemView) {
             super(itemView);
 
             mNameLabel = (TextView) itemView.findViewById(R.id.nameLabel);
@@ -67,14 +62,14 @@ public class StreamDataAdapter extends RecyclerView.Adapter<StreamDataAdapter.St
             mProfileImageView = (ImageView) itemView.findViewById(R.id.profileImageView);
         }
 
-        public void bindStreamData(StreamRealmModel result){
+        public void bindStreamData(TwitterUserModel friend) {
 
-            mNameLabel.setText(result.getName());
-            mScreenNameLabel.setText(result.getScreenName());
-            mTextLabel.setText(result.getText());
+            mNameLabel.setText(friend.getName());
+            mScreenNameLabel.setText(friend.getScreenName());
+            mTextLabel.setText(friend.getDescription());
 
             Picasso.with(mContext)
-                    .load(result.getProfileImageUrl())
+                    .load(friend.getProfileImageUrl())
                     .resize(180, 180)
                     .into(mProfileImageView);
         }

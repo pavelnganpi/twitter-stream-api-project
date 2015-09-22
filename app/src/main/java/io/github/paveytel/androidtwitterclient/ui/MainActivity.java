@@ -1,5 +1,6 @@
 package io.github.paveytel.androidtwitterclient.ui;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -7,8 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -27,13 +28,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
-import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.github.paveytel.androidtwitterclient.R;
 import io.github.paveytel.androidtwitterclient.adapter.StreamDataAdapter;
 import io.github.paveytel.androidtwitterclient.pojo.StreamRealmModel;
+import io.github.paveytel.androidtwitterclient.utils.NetworkStateDetector;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -46,11 +47,13 @@ public class MainActivity extends AppCompatActivity {
     private final String accessTokenSecret = "HZe3CvCD8XTFkylSnR5BJPu2kMmBC65NGtdxsWTYs0hFP";
     private final String STREAM_URI = "https://stream.twitter.com/1.1/statuses/filter.json?track=kim";
 
+
     protected Toolbar mToolbar;
     protected RecyclerView.LayoutManager mLayoutManager;
     protected StreamDataAdapter mStreamDataAdapter;
     private RealmChangeListener mRealmListener;
     private Realm mRealm;
+    protected NetworkStateDetector mNetworkStateDetector;
 
     RealmResults<StreamRealmModel> mQuery;
     @InjectView(R.id.recyclerView)
@@ -79,8 +82,17 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        TwitterStreamBackgroundTask twitterStreamBackgroundTask = new TwitterStreamBackgroundTask();
-        twitterStreamBackgroundTask.execute();
+        mNetworkStateDetector = new NetworkStateDetector(this, this);
+        Boolean isNetworkPresent = mNetworkStateDetector.isConnectingToInternet(); // true or false
+
+        if(isNetworkPresent) {
+
+            TwitterStreamBackgroundTask twitterStreamBackgroundTask = new TwitterStreamBackgroundTask();
+            twitterStreamBackgroundTask.execute(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        else{
+            mNetworkStateDetector.showAlertDialog();
+        }
     }
 
     @Override
@@ -93,7 +105,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+
         return true;
     }
 
@@ -107,6 +121,11 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+
+        if(id == R.id.action_search){
+            Intent intent = new Intent(this, SearchResultsActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -130,16 +149,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (mSwipeRefreshLayout.isRefreshing()) {
             mSwipeRefreshLayout.setRefreshing(false);
-            Log.d("track", "swiping stoped");
         }
-        Log.d("track", "loadData was called");
-        Log.d("track", "query size is " + mQuery.size());
-        setStreamDataAdapter(mQuery);
-        Log.d("querying", "restarted!!!!!!");
-        for (StreamRealmModel streamRealmModel : mQuery) {
-            Log.d("querying", "size: " + mQuery.size());
 
-        }
+        setStreamDataAdapter(mQuery);
 
     }
 
@@ -191,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         request.addHeader("version", "HTTP/1.1");
         request.addHeader("host", "stream.twitter.com");
         request.setConnectionKeepAlive(true);
-        request.addHeader("user-agent", "Twitter Stream Reader");
+        //request.addHeader("user-agent", "Twitter Stream Reader");
         service.signRequest(accessToken, request);
         Response response = request.send();
 
@@ -205,7 +217,6 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject jsonObject = new JSONObject(line);
 
                 if (jsonObject.getJSONObject("user") != null && jsonObject.getString("text") != null) {
-                    Log.d("testing", "text:" + jsonObject.getString("text"));
 
                     Realm realm = Realm.getInstance(getApplicationContext());
 

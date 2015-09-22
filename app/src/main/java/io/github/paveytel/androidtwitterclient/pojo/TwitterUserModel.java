@@ -1,19 +1,14 @@
 package io.github.paveytel.androidtwitterclient.pojo;
 
-import io.realm.RealmObject;
-
 /**
- * Created by z001hm0 on 9/2/15.
+ * Created by z001hm0 on 9/21/15.
  */
-
-//this is duplicate from the TwitterUserModel class, this is bad practice. But I am running out of time
-//to refactor
-public class StreamRealmModel extends RealmObject{
+public class TwitterUserModel {
 
     private String name;
     private String screenName;
     private String profileImageUrl;
-    private String text;
+    private String description;
     private long createdAt;
 
     public long getCreatedAt() {
@@ -48,11 +43,11 @@ public class StreamRealmModel extends RealmObject{
         this.profileImageUrl = profileImageUrl;
     }
 
-    public String getText() {
-        return text;
+    public String getDescription() {
+        return description;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
