@@ -3,4 +3,8 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="search_title">TwitterApiSearch</string>
+    <string name="search_hint">Type username here</string>
+    <string name="title_activity_search_results">Search</string>
+    <string name="action_search">search</string>
 </resources>
